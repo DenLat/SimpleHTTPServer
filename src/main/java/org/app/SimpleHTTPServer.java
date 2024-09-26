@@ -6,10 +6,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SimpleHTTPServer {
     private int port;
     private ExecutorService threadPool;
+    private static final Logger logger = LoggerFactory.getLogger(SimpleHTTPServer.class);
 
     public SimpleHTTPServer(int port) {
         this.port = port;
@@ -18,7 +21,7 @@ public class SimpleHTTPServer {
 
     public void start() throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
-        System.out.println("Server started on port " + port);
+        logger.info("Server started on port {}", port);
 
         while (true) {
             Socket clientSocket = serverSocket.accept();
