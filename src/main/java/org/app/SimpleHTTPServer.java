@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SimpleHTTPServer {
     private int port;
+    private ExecutorService threadPool;
 
     public SimpleHTTPServer(int port) {
         this.port = port;
+        this.threadPool = Executors.newFixedThreadPool(10);
     }
 
     public void start() throws IOException {
@@ -17,11 +21,20 @@ public class SimpleHTTPServer {
         System.out.println("Server started on port " + port);
 
         while (true) {
-            try (Socket clientSocket = serverSocket.accept()) {
-                handleRequest(clientSocket);
-            } catch (IOException e) {
-                System.err.println("Error handling request: " + e.getMessage());
-            }
+            Socket clientSocket = serverSocket.accept();
+            threadPool.submit(() -> {
+                try {
+                    handleRequest(clientSocket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        clientSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 
